@@ -47,6 +47,9 @@ ph_calculate_cases("2020-06-07") %>%
   geom_line(mapping = aes(x = repDate, y = deaths), colour = "red") +
   scale_colour_manual(name = "", values = c("blue", "red"), guide = guide_legend())
 
+## Pull june 9 data
+ph_calculate_cases("2020-06-09")
+
 
 ###
 
