@@ -38,6 +38,8 @@ recoverQCbyDay <- casesQC %>%
   rename(repDate = DateRecover,
          recovered = n)
 
+## For debugging - HOMEWORK
+
 ## Merge cases, deaths and recovered
 casesDeathsRecovered <- casesQCbyDay %>%
   inner_join(deathsQCbyDay) %>%
