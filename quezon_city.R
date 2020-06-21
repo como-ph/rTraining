@@ -1,66 +1,33 @@
 ## Exercise: Get Quezon City specific data on cases from Data Drop #############
 
 ## Load libraries
+remotes::install_github("como-ph/comoparams")
 library(comoparams)
 library(dplyr)
 library(magrittr)
 library(ggplot2)
+library(openxlsx)
 
-## Pull cases data
-cases <- ph_get_cases()
+## Get daily cases, deaths and recovered for Quezon City
+cases <- ph_get_cases() %>%
+  filter(CityMunRes == "QUEZON CITY") %>%
+  ph_calculate_cases()
+  
+## Get rates for Quezon City
+rates <- ph_get_cases() %>%
+  filter(CityMunRes == "QUEZON CITY") %>%
+  ph_calculate_rates()
 
-## Extract Quezon City specific data from cases
-casesQC <- cases %>%
-  filter(CityMunRes == "QUEZON CITY")
+## Save results as XLSX file
+params <- openxlsx::createWorkbook()
 
-## Create data.frame of per day cases, deaths and recovered
+openxlsx::addWorksheet(wb = params, sheetName = "cases")
+openxlsx::writeData(wb = params, x = cases, sheet = "cases")
 
-## Cases by day
-casesQCbyDay <- casesQC %>%
-  group_by(DateRepConf) %>%
-  count() %>%
-  rename(repDate = DateRepConf,
-         cases = n)
+openxlsx::addWorksheet(wb = params, sheetName = "rates")
+openxlsx::writeData(wb = params, x = rates, sheet = "rates")
 
-## Deaths by day
-deathsQCbyDay <- casesQC %>%
-  filter(DateDied != "") %>%
-  group_by(DateDied) %>%
-  count() %>%
-  rename(repDate = DateDied,
-         deaths = n)
-
-## Recovered by day
-recoverQCbyDay <- casesQC %>%
-  filter(DateRecover != "") %>%
-  group_by(DateRecover) %>%
-  count() %>%
-  rename(repDate = DateRecover,
-         recovered = n)
-
-## Merge cases, deaths and recovered
-casesDeathsRecovered <- casesQCbyDay %>%
-  inner_join(deathsQCbyDay) %>%
-  inner_join(recoverQCbyDay) %>%
-  mutate(repDate = as.Date(repDate))
-
-## Fill the missing dates
-repDate <- seq.Date(from = as.Date(casesDeathsRecovered$repDate[1]), 
-                    to = as.Date("2020-06-11"), 
-                    by = 1)
-
-## Convert repDate to data.frame
-repDate <- data.frame(repDate)
-
-## Merge repDate to casesDeathsRecovered to fill days with no cases/deaths/recovered
-casesDeathsRecovered <- repDate %>%
-  left_join(casesDeathsRecovered) %>%
-  mutate(cases = ifelse(is.na(cases), 0, cases),
-         deaths = ifelse(is.na(deaths), 0, deaths),
-         recovered = ifelse(is.na(recovered), 0, recovered))
-
-
-
+openxlsx::saveWorkbook(wb = params, file = "parameters.xlsx", overwrite = TRUE)
 
 
   
