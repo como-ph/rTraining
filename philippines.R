@@ -1,4 +1,4 @@
-## Exercise: Get Quezon City specific data on cases from Data Drop #############
+## Exercise: Get Philippines specific data on cases from Data Drop #############
 
 ## Load libraries
 remotes::install_github("como-ph/comoparams")
@@ -10,12 +10,10 @@ library(openxlsx)
 
 ## Get daily cases, deaths and recovered for Quezon City
 cases <- ph_get_cases() %>%
-  filter(CityMunRes == "QUEZON CITY") %>%
   ph_calculate_cases()
-  
+
 ## Get rates for Quezon City
 rates <- ph_get_cases() %>%
-  filter(CityMunRes == "QUEZON CITY") %>%
   ph_calculate_rates()
 
 ## Save results as XLSX file
@@ -27,5 +25,4 @@ openxlsx::writeData(wb = params, x = cases, sheet = "cases")
 openxlsx::addWorksheet(wb = params, sheetName = "rates")
 openxlsx::writeData(wb = params, x = rates, sheet = "rates")
 
-openxlsx::saveWorkbook(wb = params, file = "parameters.xlsx", overwrite = TRUE)
-
+openxlsx::saveWorkbook(wb = params, file = "parametersPH.xlsx", overwrite = TRUE)
